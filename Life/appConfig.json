@@ -1,0 +1,8 @@
+{
+  "Width": 10,
+  "Height": 10,
+  "CellSize": 1,
+  "Rows": 10,
+  "Columns": 10,
+  "LiveDensity": 0.5
+}
