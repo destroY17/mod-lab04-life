@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
-using Newtonsoft.Json;
-
 
 namespace cli_life
 {
     public class Program
     {
         private static Board _board;
+        private static int step = 0;
 
         private static void Reset()
         {
@@ -27,9 +21,9 @@ namespace cli_life
 
         private static void Render()
         {
-            for (int row = 0; row < _board.Rows; row++)
+            for (int col = 0; col < _board.Columns; col++)
             {
-                for (int col = 0; col < _board.Columns; col++)   
+                for (int row = 0; row < _board.Rows; row++)   
                 {
                     var cell = _board.Cells[col, row];
                     if (cell.IsAlive)
@@ -45,39 +39,80 @@ namespace cli_life
             }
         }
 
-        private static void Start()
+        private static void NextGen()
         {
             Console.Clear();
+            _board.Advance();
             Render();
             Console.WriteLine($"IsAlive = {_board.GetIsAliveCount()}");
-            _board.Advance();
         }
 
         private static void KeyManage()
         {
-            if (true)
+            if (Console.KeyAvailable)
             {
                 var key = Console.ReadKey();
 
                 switch (key.KeyChar)
                 {
+                    case ' ':
+                        NextGen();
+                        step++;
+                        break;
+                    case 'r':
+                        Reset();
+                        step = 0;
+                        break;
                     case 's':
-                        Console.WriteLine("Saving...");
+                        Console.WriteLine("\nSaving...");
                         _board.SaveToFile();
+                        LifePlot.SaveBoardPlot(_board, $"gen-{step}", $"gen-{step}.png");
                         Console.WriteLine("Saved");
                         break;
                     case 'l':
-                        Console.WriteLine("Loading new board...");
-                        _board.LoadFromFile("Data.txt");
+                        Console.WriteLine("\nLoading new board...");
+                        _board.LoadFromFile();
                         Console.WriteLine("Loaded.");
                         break;
                     case 'k':
-                        Console.WriteLine("Loading figures...");
+                        Console.WriteLine("\nLoading figures...");
                         var figures = Figure.LoadFromJson("figures.json");
                         Console.WriteLine("Loading is complete.");
 
-                        _board.AddFigure(figures[0], 9, 9);
+                        Console.WriteLine("Enter the name of figure:");
+                        var choice = Console.ReadLine();
+                        Console.WriteLine("Enter coordinates :");
+                        var coord = Console.ReadLine();
+
+                        foreach (var figure in figures)
+                        {
+                            if (figure.Name == choice)
+                                _board.AddFigure(figure, Int32.Parse(coord.Split(' ')[0]), 
+                                    Int32.Parse(coord.Split(' ')[1]));
+                        }
                         Console.WriteLine("Figure is adding");
+                        break;
+                    case 'x':
+                        if (_board.IsHorizontalSimmetry())
+                            Console.WriteLine("\nHorizontal symmetry exists");
+                        else
+                            Console.WriteLine("\nHorizontal symmetry does not exist");
+                        break;
+                    case 'y':
+                        if (_board.IsVerticalSimmetry())
+                            Console.WriteLine("\nVertical symmetry exists");
+                        else
+                            Console.WriteLine("\nVertical symmetry does not exist");
+                        break;
+                    case 'f':
+                        figures = Figure.LoadFromJson("figures.json");
+                        var counts = _board.GetNumbersOfFigures(figures);
+                        Console.WriteLine();
+
+                        foreach(var count in counts)
+                        {
+                            Console.WriteLine($"{count.Key} count = {count.Value}");
+                        }
                         break;
                 }
             }
@@ -89,9 +124,7 @@ namespace cli_life
 
             while (true)
             {
-                Start();
-                KeyManage();
-                //Thread.Sleep(1000);
+                KeyManage();   
             }
         }
     }

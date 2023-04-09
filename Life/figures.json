@@ -10,7 +10,29 @@
   },
 
   {
-    "Name": "hive",
+    "Name": "Ship",
+    "Rows": 3,
+    "Columns": 3,
+    "Encoding": [
+      "011",
+      "101",
+      "110"
+    ]
+  },
+
+  {
+    "Name": "Ship",
+    "Rows": 3,
+    "Columns": 3,
+    "Encoding": [
+      "110",
+      "101",
+      "011"
+    ]
+  },
+
+  {
+    "Name": "Hive",
     "Rows": 4,
     "Columns": 3,
     "Encoding": [
@@ -21,7 +43,7 @@
   },
 
   {
-    "Name": "hive",
+    "Name": "Hive",
     "Rows": 3,
     "Columns": 4,
     "Encoding": [
@@ -33,7 +55,7 @@
   },
 
   {
-    "Name": "loaf",
+    "Name": "Loaf",
     "Rows": 4,
     "Columns": 4,
     "Encoding": [
@@ -45,11 +67,125 @@
   },
 
   {
-    "Name": "box",
+    "Name": "Loaf",
+    "Rows": 4,
+    "Columns": 4,
+    "Encoding": [
+      "0110",
+      "1001",
+      "0101",
+      "0010"
+    ]
+  },
+
+  {
+    "Name": "Loaf",
+    "Rows": 4,
+    "Columns": 4,
+    "Encoding": [
+      "0110",
+      "1001",
+      "1010",
+      "0100"
+    ]
+  },
+
+  {
+    "Name": "Loaf",
+    "Rows": 4,
+    "Columns": 4,
+    "Encoding": [
+      "0100",
+      "1010",
+      "1001",
+      "0110"
+    ]
+  },
+
+  {
+    "Name": "Box",
     "Rows": 3,
     "Columns": 3,
     "Encoding": [
       "010",
+      "101",
+      "010"
+    ]
+  },
+
+  {
+    "Name": "Pond",
+    "Rows": 4,
+    "Columns": 4,
+    "Encoding": [
+      "0110",
+      "1001",
+      "1001",
+      "0110"
+    ]
+  },
+
+  {
+    "Name": "Snake",
+    "Rows": 4,
+    "Columns": 2,
+    "Encoding": [
+      "1011",
+      "1101"
+    ]
+  },
+
+  {
+    "Name": "Snake",
+    "Rows": 2,
+    "Columns": 4,
+    "Encoding": [
+      "11",
+      "10",
+      "01",
+      "11"
+    ]
+  },
+
+  {
+    "Name": "Boat",
+    "Rows": 3,
+    "Columns": 3,
+    "Encoding": [
+      "011",
+      "101",
+      "010"
+    ]
+  },
+
+  {
+    "Name": "Boat",
+    "Rows": 3,
+    "Columns": 3,
+    "Encoding": [
+      "010",
+      "101",
+      "110"
+    ]
+  },
+
+  {
+    "Name": "Boat",
+    "Rows": 3,
+    "Columns": 3,
+    "Encoding": [
+      "010",
+      "101",
+      "011"
+    ]
+  },
+
+  {
+    "Name": "Boat",
+    "Rows": 3,
+    "Columns": 3,
+    "Encoding": [
+      "110",
       "101",
       "010"
     ]

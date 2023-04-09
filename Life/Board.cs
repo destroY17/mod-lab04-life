@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
 using System.IO;
 using System.Linq;
+
 
 namespace cli_life
 {
@@ -33,39 +31,32 @@ namespace cli_life
             Randomize(liveDensity);
         }
 
-        public void LoadFromFile(string filePath)
+        public void LoadFromFile(string filePath = "Data.txt")
         {
-            int rows = File.ReadLines(filePath).Count();
-            int columns = 0;
+            int rows = File.ReadAllLines(filePath).Count();
 
-            using (StreamReader sr = new StreamReader(filePath))
+            using StreamReader sr = new StreamReader(filePath);
+            for (int row = 0; row < rows; row++)
             {
-                for (int row = 0; row < Rows; row++)
+                var line = sr.ReadLine().ToCharArray();
+                int columns = line.Length;
+
+                for (int col = 0; col < columns; col++)
                 {
-                    var line = sr.ReadLine().ToCharArray();
-                    columns = line.Length;
-
-                    for (int column = 0; column < Columns; column++)
-                    {
-                        Cells[column, row].IsAlive = line[column].Equals('1');
-                    }
+                    Cells[row, col].IsAlive = line[col].Equals('1');
                 }
-
-                if (rows != Rows || columns != Columns)
-                    throw new FileLoadException("Incorrect file format");
             }
-
         }
 
         public void SaveToFile(string filePath = "lastState.txt")
         {
             using (StreamWriter sw = new StreamWriter(filePath))
             {
-                for (int row = 0; row < Rows; row++)
+                for (int col = 0; col < Columns; col++)
                 {
-                    for (int column = 0; column < Columns; column++)
+                    for (int row = 0; row < Rows; row++)
                     {
-                        if (Cells[column, row].IsAlive)
+                        if (Cells[col, row].IsAlive)
                             sw.Write('1');
                         else
                             sw.Write('0');
@@ -130,34 +121,179 @@ namespace cli_life
                 {
                     var figureCellAlive = figure.Cells[x - xStart, y - yStart].IsAlive;
 
-                    if (x < Columns && y < Rows)
-                    {
-                        Cells[x, y].IsAlive = figureCellAlive;
-                    }
-                    else if (x == Columns && y == Rows)
-                    {
-                        Cells[0, 0].IsAlive = figureCellAlive;
-                    }
-                    else if (x == Columns)
-                    {
-                        Cells[0, y].IsAlive = figureCellAlive;
-                    }
-                    else if (y == Rows)
-                    {
-                        Cells[x, 0].IsAlive = figureCellAlive;
-                    }
+                    int xBoard = x >= Columns ? x - Columns : x;
+                    int yBoard = y >= Rows ? y - Rows : y;
+
+                    Cells[xBoard, yBoard].IsAlive = figureCellAlive;
                 }
             }
         }
 
-        public int GetIsAliveCount()
-        {
-            return Cells.Cast<Cell>().Count(cell => cell.IsAlive);
-        }
+        public int GetIsAliveCount() => Cells.Cast<Cell>().Count(cell => cell.IsAlive);
 
         public bool IsHorizontalSimmetry()
         {
-            int middle = 
+            int middle = Columns / 2;
+
+            for (int row = 0; row < Rows; row++)
+            {
+                for (int col = 0; col < middle; col++)
+                {
+                    if (Cells[col, row].IsAlive != Cells[Columns - 1 - col, row].IsAlive)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public bool IsVerticalSimmetry()
+        {
+            int middle = Rows / 2;
+
+            for (int col = 0; col < Columns; col++)
+            {
+                for (int row = 0; row < middle; row++)
+                {
+                    if (Cells[col, row].IsAlive != Cells[col, Rows - 1 - row].IsAlive)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        private bool ContainsFigureInFrame(int xStart, int yStart, Figure figure)
+        {
+            if (!CheckNeighborCorners(xStart, yStart, figure))
+                return false;
+
+            for (int col = 0; col < figure.Columns; col++)
+            {
+                int xBoard = xStart + col;
+
+                if (xBoard >= Columns)
+                    xBoard -= Columns;
+
+                for (int row = 0; row < figure.Rows; row++)
+                {
+                    int yBoard = yStart + row;
+
+                    if (yBoard >= Rows)
+                        yBoard -= Rows;
+
+                    if (figure.Cells[col, row].IsAlive != Cells[xBoard, yBoard].IsAlive)
+                        return false;
+
+
+                    if (col == 0)
+                    {
+                        var upperCol = xBoard - 1 < 0 ?
+                            Columns - 1 : xBoard - 1;
+
+                        if (Cells[upperCol, yBoard].IsAlive)
+                            return false;
+                    }
+                    else if (col == figure.Columns - 1)
+                    {
+                        var lowerCol = xBoard + 1 >= Columns ?
+                            xBoard + 1 - Columns : xBoard + 1;
+
+                        if (Cells[lowerCol, yBoard].IsAlive)
+                            return false;
+                    }
+
+                    if (row == 0)
+                    {
+                        var upperRow = yBoard - 1 < 0 ?
+                            Rows - 1 : yBoard - 1;
+
+                        if (Cells[xBoard, upperRow].IsAlive)
+                            return false;
+                    }
+                    else if (row == figure.Rows - 1)
+                    {
+                        var lowerRow = yBoard + 1 >= Rows ?
+                            yBoard + 1 - Rows : yBoard + 1;
+
+                        if (Cells[xBoard, lowerRow].IsAlive)
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        private bool CheckNeighborCorners(int xStart, int yStart, Figure figure)
+        {
+            int left = xStart - 1 < 0 ? Columns - 1 : xStart - 1;
+
+            int right = xStart + figure.Columns;
+            right = right >= Columns ? right - Columns : right;
+
+            int up = yStart - 1 < 0 ? Rows - 1 : yStart - 1;
+
+            int down = yStart + figure.Rows;
+            down = down >= Rows ? down - Rows : down;
+
+            return !Cells[left, up].IsAlive && !Cells[left, down].IsAlive &&
+                !Cells[right, up].IsAlive && !Cells[right, down].IsAlive;
+        }
+
+        public int GetNumberOfFigure(Figure figure)
+        {
+            if (figure.Columns > Columns || figure.Rows > Rows)
+                return 0;
+
+            int countFigures = 0;
+            for (int xBoard = 0; xBoard < Columns; xBoard++)
+            {
+                for (int yBoard = 0; yBoard < Rows; yBoard++)
+                {
+                    if (ContainsFigureInFrame(xBoard, yBoard, figure))
+                        countFigures++;
+                }
+            }
+            return countFigures;
+        }
+
+        public Dictionary<string, int> GetNumbersOfFigures(IEnumerable<Figure> figures)
+        {
+            var numbers = new Dictionary<string, int>();
+
+            foreach (var figure in figures)
+            {
+                if (numbers.ContainsKey(figure.Name))
+                    numbers[figure.Name] += GetNumberOfFigure(figure);
+                else
+                    numbers.Add(figure.Name, GetNumberOfFigure(figure));
+            }
+            return numbers;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Board))
+                throw new ArgumentException();
+
+            Board other = obj as Board;
+            
+            if (Width != other.Width ||  Height != other.Height
+                || CellSize != other.CellSize)
+                return false;
+
+            for (int col = 0; col < Columns; col++)
+            {
+                for (int row = 0; row < Rows; row++)
+                {
+                    if (other.Cells[col, row].IsAlive != Cells[col, row].IsAlive)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

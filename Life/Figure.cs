@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.Json;
 using System.IO;
 using System.Linq;
@@ -34,7 +32,7 @@ namespace cli_life
                 {
                     cells[x, y] = new Cell()
                     {
-                        IsAlive = Encoding[x * (Columns - 1) + y].Equals('1')
+                        IsAlive = Encoding[x * Rows + y].Equals('1')
                     };
                 }
             }
@@ -45,23 +43,21 @@ namespace cli_life
         {
             var json = File.ReadAllText(filePath);
 
-            using (var document = JsonDocument.Parse(json))
-            {
-                var figuresCollections = document.RootElement.EnumerateArray();
-                var figures = new List<Figure>();
+            using var document = JsonDocument.Parse(json);
 
-                foreach(var figure in figuresCollections)
-                {
-                    var name = figure.GetProperty("Name").GetString();
-                    var rows = figure.GetProperty("Rows").GetInt32();
-                    var columns = figure.GetProperty("Columns").GetInt32();
-                    var encoding = string.Join("", figure.GetProperty("Encoding").EnumerateArray()
-                        .Select(row => row.GetString()));
+            var figuresCollection = document.RootElement.EnumerateArray();
+            var figures = new List<Figure>();
 
-                    figures.Add(new Figure(name, rows, columns, encoding));
-                }
-                return figures;
-            }
+            figures.AddRange(figuresCollection.Select(figure =>
+            new Figure(
+                figure.GetProperty("Name").GetString(),
+                figure.GetProperty("Rows").GetInt32(),
+                figure.GetProperty("Columns").GetInt32(),
+                string.Concat(figure.GetProperty("Encoding")
+                .EnumerateArray().Select(row => row.GetString()))
+            )));
+
+            return figures;
         }
     }
 }
